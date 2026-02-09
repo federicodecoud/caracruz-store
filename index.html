@@ -1,41 +1,72 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mi Tienda Online</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Caracruz Store</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Netlify Identity -->
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 </head>
+
 <body>
 
-<header>
-  <h1>CARACRUZ</h1>
-  <p>Productos exclusivos</p>
-</header>
+  <header style="background:black;color:white;padding:40px;text-align:center;">
+    <h1>CARACRUZ</h1>
+    <p>Productos exclusivos</p>
+  </header>
 
-<section class="productos">
+  <main style="display:flex;justify-content:center;gap:40px;margin-top:50px;">
 
-  <div class="producto">
-    <img src="img/1.jpg" alt="Producto 1">
-    <h3>Producto 1</h3>
-    <p class="precio">Gs. 120.000</p>
-    <button onclick="comprar('Producto 1')">Comprar</button>
+    <div style="background:#f2f2f2;padding:20px;border-radius:10px;text-align:center;">
+      <img src="img/producto1.jpg" width="250">
+      <h3>Producto 1</h3>
+      <p><strong>Gs. 120.000</strong></p>
+      <button style="background:#28a745;color:white;padding:10px 20px;border:none;border-radius:5px;">
+        Comprar
+      </button>
+    </div>
+
+    <div style="background:#f2f2f2;padding:20px;border-radius:10px;text-align:center;">
+      <img src="img/producto2.jpg" width="250">
+      <h3>Producto 2</h3>
+      <p><strong>Gs. 180.000</strong></p>
+      <button style="background:#28a745;color:white;padding:10px 20px;border:none;border-radius:5px;">
+        Comprar
+      </button>
+    </div>
+
+  </main>
+
+  <!-- Login invisible -->
+  <div style="text-align:center;margin-top:50px;">
+    <button onclick="netlifyIdentity.open()" style="padding:8px 15px;">
+      Admin Login
+    </button>
   </div>
 
-  <div class="producto">
-    <img src="img/2.jpg" alt="Producto 2">
-    <h3>Producto 2</h3>
-    <p class="precio">Gs. 180.000</p>
-    <button onclick="comprar('Producto 2')">Comprar</button>
-  </div>
+  <script>
+    if (window.netlifyIdentity) {
 
-</section>
+      window.netlifyIdentity.init();
 
+      // Si viene recovery token
+      if (window.location.hash.includes("recovery_token")) {
+        window.netlifyIdentity.open("recovery");
+      }
 
-<footer>
-  <p>© 2026 Mi Tienda</p>
-</footer>
+      // Si viene invitación
+      if (window.location.hash.includes("invite_token")) {
+        window.netlifyIdentity.open("signup");
+      }
 
-<script src="script.js"></script>
+      // Cuando se loguea, va al panel
+      window.netlifyIdentity.on("login", function(user) {
+        document.location.href = "/admin/";
+      });
+
+    }
+  </script>
+
 </body>
 </html>
