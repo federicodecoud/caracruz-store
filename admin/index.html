@@ -23,11 +23,35 @@
     <button onclick="saveProduct()">Guardar producto</button>
   </div>
 
-  <script>
-    netlifyIdentity.on("login", user => {
-      document.getElementById("login").style.display = "none";
-      document.getElementById("admin").style.display = "block";
-    });
+<script>
+if (window.netlifyIdentity) {
+  window.netlifyIdentity.on("init", user => {
+    if (user) {
+      checkRole(user);
+    }
+  });
+
+  window.netlifyIdentity.on("login", user => {
+    checkRole(user);
+  });
+}
+
+function checkRole(user) {
+  const roles = user.app_metadata?.roles || [];
+
+  if (roles.includes("admin")) {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("admin").style.display = "block";
+  } else {
+    alert("No tienes permisos de administrador");
+  }
+}
+
+function saveProduct() {
+  alert("Producto guardado (luego conectamos guardado real)");
+}
+</script>
+
 
     function saveProduct() {
       alert("Producto guardado (luego conectamos guardado real)");
