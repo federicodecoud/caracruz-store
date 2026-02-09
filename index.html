@@ -56,7 +56,9 @@ container.innerHTML+=`
 <img src="${p.image}">
 <h3>${p.name}</h3>
 <p><strong>Gs. ${Number(p.price).toLocaleString()}</strong></p>
+<a href="https://wa.me/595971206016?text=Hola,%20quiero%20comprar%20${encodeURIComponent(p.name)}%20por%20Gs.%20${p.price}" target="_blank">
 <button>Comprar</button>
+</a>
 ${netlifyIdentity.currentUser() ? `
 <button class="edit" onclick="editProduct(${index})">Editar</button>
 <button class="delete" onclick="deleteProduct(${index})">Borrar</button>
@@ -146,3 +148,4 @@ renderProducts();
 
 </body>
 </html>
+
