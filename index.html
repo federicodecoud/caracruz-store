@@ -1,74 +1,145 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Caracruz Store</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>Caracruz Store</title>
 
-  <!-- Netlify Identity -->
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#f4f4f4;
+}
+
+header{
+  background:black;
+  color:white;
+  text-align:center;
+  padding:40px 20px;
+}
+
+.products{
+  display:flex;
+  gap:30px;
+  justify-content:center;
+  flex-wrap:wrap;
+  padding:40px;
+}
+
+.card{
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  width:250px;
+  text-align:center;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+.card img{
+  width:100%;
+  border-radius:8px;
+}
+
+button{
+  background:#28a745;
+  color:white;
+  padding:10px 20px;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+}
+
+.admin-panel{
+  display:none;
+  background:white;
+  padding:20px;
+  margin:20px;
+  border-radius:10px;
+  max-width:400px;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin-bottom:10px;
+}
+</style>
 </head>
 
 <body>
 
-  <header style="background:black;color:white;padding:40px;text-align:center;">
-    <h1>CARACRUZ</h1>
-    <p>Productos exclusivos</p>
-  </header>
+<header>
+  <h1>CARACRUZ</h1>
+  <p>Productos exclusivos</p>
+</header>
 
-  <main style="display:flex;justify-content:center;gap:40px;margin-top:50px;">
+<div class="products" id="products"></div>
 
-    <div style="background:#f2f2f2;padding:20px;border-radius:10px;text-align:center;">
-  <img src="img/1.jpg" width="250">
-  <h3>Producto 1</h3>
-  <p><strong>Gs. 120.000</strong></p>
-  <button style="background:#28a745;color:white;padding:10px 20px;border:none;border-radius:5px;">
-    Comprar
-  </button>
+<div style="text-align:center;margin-bottom:40px;">
+  <button onclick="netlifyIdentity.open()">Admin Login</button>
 </div>
 
-<div style="background:#f2f2f2;padding:20px;border-radius:10px;text-align:center;">
-  <img src="img/2.jpg" width="250">
-  <h3>Producto 2</h3>
-  <p><strong>Gs. 180.000</strong></p>
-  <button style="background:#28a745;color:white;padding:10px 20px;border:none;border-radius:5px;">
-    Comprar
-  </button>
+<div class="admin-panel" id="adminPanel">
+  <h2>Agregar Producto</h2>
+  <input id="name" placeholder="Nombre del producto">
+  <input id="price" placeholder="Precio (ej: 120000)">
+  <input id="image" placeholder="URL imagen (ej: img/1.jpg)">
+  <button onclick="addProduct()">Guardar Producto</button>
 </div>
 
+<script>
 
-  </main>
+let products = JSON.parse(localStorage.getItem("products")) || [];
 
-  <!-- Login invisible -->
-  <div style="text-align:center;margin-top:50px;">
-    <button onclick="netlifyIdentity.open()" style="padding:8px 15px;">
-      Admin Login
-    </button>
-  </div>
+function renderProducts(){
+  const container = document.getElementById("products");
+  container.innerHTML = "";
 
-  <script>
-    if (window.netlifyIdentity) {
+  products.forEach(p=>{
+    container.innerHTML += `
+      <div class="card">
+        <img src="${p.image}">
+        <h3>${p.name}</h3>
+        <p><strong>Gs. ${Number(p.price).toLocaleString()}</strong></p>
+        <button>Comprar</button>
+      </div>
+    `;
+  });
+}
 
-      window.netlifyIdentity.init();
+function addProduct(){
+  const name = document.getElementById("name").value;
+  const price = document.getElementById("price").value;
+  const image = document.getElementById("image").value;
 
-      // Si viene recovery token
-      if (window.location.hash.includes("recovery_token")) {
-        window.netlifyIdentity.open("recovery");
-      }
+  if(!name || !price || !image){
+    alert("Completar todos los campos");
+    return;
+  }
 
-      // Si viene invitación
-      if (window.location.hash.includes("invite_token")) {
-        window.netlifyIdentity.open("signup");
-      }
+  products.push({name, price, image});
+  localStorage.setItem("products", JSON.stringify(products));
+  renderProducts();
 
-      // Cuando se loguea, va al panel
-      window.netlifyIdentity.on("login", function(user) {
-        document.location.href = "/admin/";
-      });
+  document.getElementById("name").value="";
+  document.getElementById("price").value="";
+  document.getElementById("image").value="";
+}
 
-    }
-  </script>
+netlifyIdentity.on("login", user => {
+  document.getElementById("adminPanel").style.display = "block";
+  netlifyIdentity.close();
+});
+
+netlifyIdentity.on("logout", () => {
+  document.getElementById("adminPanel").style.display = "none";
+});
+
+renderProducts();
+
+</script>
 
 </body>
 </html>
-
