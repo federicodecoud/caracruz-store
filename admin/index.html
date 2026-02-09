@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin - Caracruz</title>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+</head>
+<body>
+  <h1>Panel Admin Caracruz</h1>
+
+  <div id="login">
+    <button onclick="netlifyIdentity.open()">Login</button>
+  </div>
+
+  <div id="admin" style="display:none;">
+    <h2>Agregar Producto</h2>
+
+    <input id="name" placeholder="Nombre del producto"><br><br>
+    <input id="price" placeholder="Precio"><br><br>
+    <input id="image" placeholder="URL imagen"><br><br>
+    <textarea id="description" placeholder="Descripción"></textarea><br><br>
+
+    <button onclick="saveProduct()">Guardar producto</button>
+  </div>
+
+  <script>
+    netlifyIdentity.on("login", user => {
+      document.getElementById("login").style.display = "none";
+      document.getElementById("admin").style.display = "block";
+    });
+
+    function saveProduct() {
+      alert("Producto guardado (luego conectamos guardado real)");
+    }
+  </script>
+</body>
+</html>
