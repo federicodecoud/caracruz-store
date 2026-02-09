@@ -7,134 +7,137 @@
 <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
 <style>
-body{
-  margin:0;
-  font-family:Arial, sans-serif;
-  background:#f4f4f4;
-}
-
-header{
-  background:black;
-  color:white;
-  text-align:center;
-  padding:40px 20px;
-}
-
-.products{
-  display:flex;
-  gap:30px;
-  justify-content:center;
-  flex-wrap:wrap;
-  padding:40px;
-}
-
-.card{
-  background:white;
-  padding:20px;
-  border-radius:10px;
-  width:250px;
-  text-align:center;
-  box-shadow:0 4px 10px rgba(0,0,0,0.1);
-}
-
-.card img{
-  width:100%;
-  border-radius:8px;
-}
-
-button{
-  background:#28a745;
-  color:white;
-  padding:10px 20px;
-  border:none;
-  border-radius:5px;
-  cursor:pointer;
-}
-
-.admin-panel{
-  display:none;
-  background:white;
-  padding:20px;
-  margin:20px;
-  border-radius:10px;
-  max-width:400px;
-}
-
-input{
-  width:100%;
-  padding:10px;
-  margin-bottom:10px;
-}
+body{margin:0;font-family:Arial;background:#f4f4f4;}
+header{background:black;color:white;text-align:center;padding:40px;}
+.products{display:flex;flex-wrap:wrap;gap:30px;justify-content:center;padding:40px;}
+.card{background:white;padding:20px;border-radius:10px;width:260px;text-align:center;box-shadow:0 4px 10px rgba(0,0,0,0.1);}
+.card img{width:100%;border-radius:8px;}
+button{background:#28a745;color:white;padding:8px 15px;border:none;border-radius:5px;margin:5px;cursor:pointer;}
+.delete{background:#dc3545;}
+.edit{background:#ffc107;color:black;}
+.admin-panel{display:none;background:white;padding:20px;margin:20px auto;border-radius:10px;max-width:400px;}
+input{width:100%;padding:10px;margin-bottom:10px;}
 </style>
 </head>
 
 <body>
 
 <header>
-  <h1>CARACRUZ</h1>
-  <p>Productos exclusivos</p>
+<h1>CARACRUZ</h1>
+<p>Productos exclusivos</p>
 </header>
 
 <div class="products" id="products"></div>
 
-<div style="text-align:center;margin-bottom:40px;">
-  <button onclick="netlifyIdentity.open()">Admin Login</button>
+<div style="text-align:center;margin-bottom:20px;">
+<button onclick="netlifyIdentity.open()">Admin Login</button>
 </div>
 
 <div class="admin-panel" id="adminPanel">
-  <h2>Agregar Producto</h2>
-  <input id="name" placeholder="Nombre del producto">
-  <input id="price" placeholder="Precio (ej: 120000)">
-  <input id="image" placeholder="URL imagen (ej: img/1.jpg)">
-  <button onclick="addProduct()">Guardar Producto</button>
+<h2 id="formTitle">Agregar Producto</h2>
+<input id="name" placeholder="Nombre">
+<input id="price" placeholder="Precio">
+<input type="file" id="imageFile" accept="image/*">
+<button onclick="saveProduct()">Guardar</button>
 </div>
 
 <script>
 
 let products = JSON.parse(localStorage.getItem("products")) || [];
+let editIndex = null;
 
 function renderProducts(){
-  const container = document.getElementById("products");
-  container.innerHTML = "";
+const container = document.getElementById("products");
+container.innerHTML="";
 
-  products.forEach(p=>{
-    container.innerHTML += `
-      <div class="card">
-        <img src="${p.image}">
-        <h3>${p.name}</h3>
-        <p><strong>Gs. ${Number(p.price).toLocaleString()}</strong></p>
-        <button>Comprar</button>
-      </div>
-    `;
-  });
+products.forEach((p,index)=>{
+container.innerHTML+=`
+<div class="card">
+<img src="${p.image}">
+<h3>${p.name}</h3>
+<p><strong>Gs. ${Number(p.price).toLocaleString()}</strong></p>
+<button>Comprar</button>
+${netlifyIdentity.currentUser() ? `
+<button class="edit" onclick="editProduct(${index})">Editar</button>
+<button class="delete" onclick="deleteProduct(${index})">Borrar</button>
+` : ""}
+</div>
+`;
+});
 }
 
-function addProduct(){
-  const name = document.getElementById("name").value;
-  const price = document.getElementById("price").value;
-  const image = document.getElementById("image").value;
+function saveProduct(){
+const name=document.getElementById("name").value;
+const price=document.getElementById("price").value;
+const file=document.getElementById("imageFile").files[0];
 
-  if(!name || !price || !image){
-    alert("Completar todos los campos");
-    return;
-  }
-
-  products.push({name, price, image});
-  localStorage.setItem("products", JSON.stringify(products));
-  renderProducts();
-
-  document.getElementById("name").value="";
-  document.getElementById("price").value="";
-  document.getElementById("image").value="";
+if(!name||!price){
+alert("Completar nombre y precio");
+return;
 }
 
-netlifyIdentity.on("login", user => {
-  document.getElementById("adminPanel").style.display = "block";
-  netlifyIdentity.close();
+if(file){
+const reader=new FileReader();
+reader.onload=function(e){
+const imageData=e.target.result;
+
+if(editIndex!==null){
+products[editIndex]={name,price,image:imageData};
+editIndex=null;
+document.getElementById("formTitle").innerText="Agregar Producto";
+}else{
+products.push({name,price,image:imageData});
+}
+
+localStorage.setItem("products",JSON.stringify(products));
+renderProducts();
+clearForm();
+};
+reader.readAsDataURL(file);
+}else{
+if(editIndex!==null){
+products[editIndex].name=name;
+products[editIndex].price=price;
+editIndex=null;
+document.getElementById("formTitle").innerText="Agregar Producto";
+localStorage.setItem("products",JSON.stringify(products));
+renderProducts();
+clearForm();
+}
+}
+}
+
+function editProduct(index){
+const p=products[index];
+document.getElementById("name").value=p.name;
+document.getElementById("price").value=p.price;
+editIndex=index;
+document.getElementById("formTitle").innerText="Editar Producto";
+}
+
+function deleteProduct(index){
+if(confirm("¿Eliminar producto?")){
+products.splice(index,1);
+localStorage.setItem("products",JSON.stringify(products));
+renderProducts();
+}
+}
+
+function clearForm(){
+document.getElementById("name").value="";
+document.getElementById("price").value="";
+document.getElementById("imageFile").value="";
+}
+
+netlifyIdentity.on("login",()=>{
+document.getElementById("adminPanel").style.display="block";
+netlifyIdentity.close();
+renderProducts();
 });
 
-netlifyIdentity.on("logout", () => {
-  document.getElementById("adminPanel").style.display = "none";
+netlifyIdentity.on("logout",()=>{
+document.getElementById("adminPanel").style.display="none";
+renderProducts();
 });
 
 renderProducts();
